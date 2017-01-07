@@ -1,0 +1,4 @@
+---
+
+log_file: config.log
+log_level: dd
