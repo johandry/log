@@ -9,9 +9,14 @@ import (
 )
 
 const (
-	OutputKey   = "log_output"
-	FilenameKey = "log_filename"
-	LevelKey    = "log_level"
+	OutputKey           = "log_output"
+	FilenameKey         = "log_filename"
+	LevelKey            = "log_level"
+	ForceColorsKey      = "log_color"
+	DisableColorsKey    = "log_nocolor"
+	DisableTimestampKey = "log_notimestamp"
+	ShortTimestampKey   = "log_shorttimestamp"
+	TimestampFormatKey  = "log_formattimestamp"
 )
 
 const (
@@ -27,7 +32,13 @@ const (
 // 	"panic"  - PANIC
 
 func NewEntry() *logrus.Entry {
-	logrus.SetFormatter(&TextFormatter{})
+	logrus.SetFormatter(&TextFormatter{
+		ForceColors:      viper.GetBool(ForceColorsKey),
+		DisableColors:    viper.GetBool(DisableColorsKey),
+		DisableTimestamp: viper.GetBool(DisableTimestampKey),
+		ShortTimestamp:   viper.GetBool(ShortTimestampKey),
+		TimestampFormat:  viper.GetString(TimestampFormatKey),
+	})
 	// DisableTimestamp: true, DisableColors: true
 
 	if viper.IsSet(OutputKey) {

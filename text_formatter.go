@@ -107,19 +107,7 @@ func (f *TextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	if isColored {
 		f.printColored(b, entry, keys, timestampFormat)
 	} else {
-		if !f.DisableTimestamp {
-			f.appendKeyValue(b, "time", entry.Time.Format(timestampFormat))
-		}
-		f.appendKeyValue(b, "level", entry.Level.String())
-		if _, ok := entry.Data[PrefixField]; ok {
-			f.appendKeyValue(b, PrefixField, strings.ToLower(entry.Data[PrefixField].(string)))
-		}
-		if entry.Message != "" {
-			f.appendKeyValue(b, "msg", entry.Message)
-		}
-		for _, key := range keys {
-			f.appendKeyValue(b, key, entry.Data[key])
-		}
+		f.printNoColor(b, entry, keys, timestampFormat)
 	}
 
 	b.WriteByte('\n')
@@ -140,8 +128,7 @@ func prefixFieldClashes(data logrus.Fields) {
 	}
 }
 
-func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys []string, timestampFormat string) {
-	var levelColor string
+func (f *TextFormatter) levelColor(entry *logrus.Entry) (levelColor string) {
 	switch entry.Level {
 	case logrus.DebugLevel:
 		levelColor = colorDebug
@@ -152,8 +139,10 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 	case logrus.ErrorLevel, logrus.FatalLevel, logrus.PanicLevel:
 		levelColor = colorErrorFatalPanic
 	}
+	return
+}
 
-	var levelText string
+func (f *TextFormatter) levelText(entry *logrus.Entry) (levelText string) {
 	switch entry.Level {
 	case logrus.InfoLevel:
 		levelText = strings.ToUpper(entry.Level.String()) + " "
@@ -162,27 +151,57 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 	default:
 		levelText = strings.ToUpper(entry.Level.String())
 	}
+	return
+}
 
-	prefixText := ""
+func (f *TextFormatter) prefixText(entry *logrus.Entry) (prefixText string) {
+	prefixText = ""
 	if _, ok := entry.Data[PrefixField]; ok {
-		prefixText = fmt.Sprintf(" %s%s:%s", colorPrefix, strings.Title(entry.Data[PrefixField].(string)), ansi.Reset)
+		prefixText = fmt.Sprintf(" %s:", strings.Title(entry.Data[PrefixField].(string)))
 	}
+	return
+}
+
+func (f *TextFormatter) timeText(entry *logrus.Entry, timestampFormat string) (timeText string) {
+	timeText = entry.Time.Format(timestampFormat)
+	if f.ShortTimestamp {
+		timeText = fmt.Sprintf("%04d", miniTS())
+	}
+	return
+}
+
+func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys []string, timestampFormat string) {
+	levelColor := f.levelColor(entry)
+	levelText := f.levelText(entry)
+	prefixText := f.prefixText(entry)
 
 	if f.DisableTimestamp {
 		fmt.Fprintf(b, "%s%+5s%s%s %s", levelColor, levelText, ansi.Reset, prefixText, entry.Message)
 	} else {
-		timeText := entry.Time.Format(timestampFormat)
-		if f.ShortTimestamp {
-			timeText = fmt.Sprintf("%04d", miniTS())
-		}
-
+		timeText := f.timeText(entry, timestampFormat)
 		fmt.Fprintf(b, "%s[%s]%s %s%+5s%s%s %s", colorTimestamp, timeText, ansi.Reset, levelColor, levelText, ansi.Reset, prefixText, entry.Message)
 	}
 
 	for _, k := range keys {
 		v := entry.Data[k]
-		fmt.Fprintf(b, " %s%s%s=", levelColor, k, ansi.Reset)
-		f.appendValue(b, v)
+		f.appendKeyValue(b, fmt.Sprintf(" %s%s%s=", levelColor, k, ansi.Reset), v)
+	}
+}
+
+func (f *TextFormatter) printNoColor(b *bytes.Buffer, entry *logrus.Entry, keys []string, timestampFormat string) {
+	levelText := f.levelText(entry)
+	prefixText := f.prefixText(entry)
+
+	if f.DisableTimestamp {
+		fmt.Fprintf(b, "%+5s%s %s", levelText, prefixText, entry.Message)
+	} else {
+		timeText := f.timeText(entry, timestampFormat)
+		fmt.Fprintf(b, "[%s] %+5s%s %s", timeText, levelText, prefixText, entry.Message)
+	}
+
+	for _, k := range keys {
+		v := entry.Data[k]
+		f.appendKeyValue(b, k, v)
 	}
 }
 
@@ -199,11 +218,10 @@ func needsQuoting(text string) bool {
 }
 
 func (f *TextFormatter) appendKeyValue(b *bytes.Buffer, key string, value interface{}) {
-
+	b.WriteByte(' ')
 	b.WriteString(key)
 	b.WriteByte('=')
 	f.appendValue(b, value)
-	b.WriteByte(' ')
 }
 
 func (f *TextFormatter) appendValue(b *bytes.Buffer, value interface{}) {

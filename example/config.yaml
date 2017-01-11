@@ -1,4 +1,5 @@
 ---
 
 log_filename: config.log
-log_level: dd
+log_level: error
+log_nocolor: true
