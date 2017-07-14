@@ -40,12 +40,10 @@ var (
 
 var (
 	baseTimestamp time.Time
-	isTerminal    bool
 )
 
 func init() {
 	baseTimestamp = time.Now()
-	isTerminal = logrus.IsTerminal()
 }
 
 func miniTS() int {
@@ -97,7 +95,7 @@ func (f *TextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	prefixFieldClashes(entry.Data)
 
-	isColorTerminal := isTerminal && (runtime.GOOS != "windows")
+	isColorTerminal := logrus.IsTerminal(entry.Logger.Out) && (runtime.GOOS != "windows")
 	isColored := (f.ForceColors || isColorTerminal) && !f.DisableColors
 
 	timestampFormat := f.TimestampFormat
