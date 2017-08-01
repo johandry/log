@@ -8,6 +8,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// OutputKey ...
+// FilenameKey ...
+// LevelKey ...
+// ForceColorsKey ...
+// DisableColorsKey ...
+// DisableTimestampKey ...
+// ShortTimestampKey ...
+// TimestampFormatKey ...
 const (
 	OutputKey           = "log_output"
 	FilenameKey         = "log_filename"
@@ -19,6 +27,7 @@ const (
 	TimestampFormatKey  = "log_formattimestamp"
 )
 
+// PrefixField ...
 const (
 	PrefixField = "prefix"
 )
@@ -31,6 +40,7 @@ const (
 // 	"fatal"  - FATAL
 // 	"panic"  - PANIC
 
+// NewEntry ...
 func NewEntry() *logrus.Entry {
 	logrus.SetFormatter(&TextFormatter{
 		ForceColors:      viper.GetBool(ForceColorsKey),
@@ -55,24 +65,26 @@ func NewEntry() *logrus.Entry {
 	}
 
 	if viper.IsSet(LevelKey) {
-		log_level, err := logrus.ParseLevel(viper.GetString(LevelKey))
+		logLevel, err := logrus.ParseLevel(viper.GetString(LevelKey))
 		if err == nil {
-			logrus.SetLevel(log_level)
+			logrus.SetLevel(logLevel)
 		}
 	}
 
 	return logrus.NewEntry(logrus.StandardLogger())
 }
 
-// Create a new logrus.Logger
+// NewEntryWithPrefix creates a new logrus.Logger
 func NewEntryWithPrefix(prefix string) *logrus.Entry {
 	return NewEntry().WithField(PrefixField, prefix)
 }
 
+// Prefix ...
 func Prefix(prefix string) *logrus.Entry {
 	return NewEntryWithPrefix(prefix)
 }
 
+// Std ...
 func Std() *logrus.Entry {
 	return NewEntry()
 }

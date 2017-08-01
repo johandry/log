@@ -3,10 +3,14 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
 	"runtime"
 	"sort"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/mgutz/ansi"
@@ -50,6 +54,7 @@ func miniTS() int {
 	return int(time.Since(baseTimestamp) / time.Second)
 }
 
+// TextFormatter ...
 type TextFormatter struct {
 	// Set to true to bypass checking for a TTY before outputting colors.
 	ForceColors bool
@@ -74,9 +79,10 @@ type TextFormatter struct {
 	DisableSorting bool
 }
 
+// Format ...
 func (f *TextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	var b *bytes.Buffer
-	var keys []string = make([]string, 0, len(entry.Data))
+	var keys = make([]string, 0, len(entry.Data))
 	for k := range entry.Data {
 		if k == PrefixField {
 			continue
@@ -95,7 +101,7 @@ func (f *TextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	prefixFieldClashes(entry.Data)
 
-	isColorTerminal := logrus.IsTerminal(entry.Logger.Out) && (runtime.GOOS != "windows")
+	isColorTerminal := checkIfTerminal(entry.Logger.Out) && (runtime.GOOS != "windows")
 	isColored := (f.ForceColors || isColorTerminal) && !f.DisableColors
 
 	timestampFormat := f.TimestampFormat
@@ -110,6 +116,15 @@ func (f *TextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	b.WriteByte('\n')
 	return b.Bytes(), nil
+}
+
+func checkIfTerminal(w io.Writer) bool {
+	switch v := w.(type) {
+	case *os.File:
+		return terminal.IsTerminal(int(v.Fd()))
+	default:
+		return false
+	}
 }
 
 func prefixFieldClashes(data logrus.Fields) {
