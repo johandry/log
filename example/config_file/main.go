@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/johandry/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -42,8 +42,6 @@ func main() {
 	viper.Set(log.LevelKey, "debug")
 
 	log.Prefix("main").WithFields(logrus.Fields{"key": "value", "env": "test testea"}).Info("Information")
-	log.Std().Debug("Debuging")
 	log.Prefix("main").Warn("Warning")
 	log.Prefix("main").Error("Error")
-	log.Std().Fatal("Fatal")
 }

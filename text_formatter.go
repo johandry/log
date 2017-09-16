@@ -12,8 +12,8 @@ import (
 
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/mgutz/ansi"
+	"github.com/sirupsen/logrus"
 )
 
 // COLORS:
@@ -197,7 +197,7 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 
 	for _, k := range keys {
 		v := entry.Data[k]
-		f.appendKeyValue(b, fmt.Sprintf(" %s%s%s=", levelColor, k, ansi.Reset), v)
+		f.appendKeyValue(b, fmt.Sprintf("%s%s%s", levelColor, k, ansi.Reset), v)
 	}
 }
 
