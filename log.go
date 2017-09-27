@@ -9,14 +9,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-// OutputKey ...
-// FilenameKey ...
-// LevelKey ...
-// ForceColorsKey ...
-// DisableColorsKey ...
-// DisableTimestampKey ...
-// ShortTimestampKey ...
-// TimestampFormatKey ...
+// OutputKey is the viper variable used to define the output
+// FilenameKey is the viper variable used to define log filename
+// LevelKey is the viper variable used to define log level key
+// ForceColorsKey is the viper variable used to define if color should be forced
+// DisableColorsKey is the viper variable used to define if the colors should be
+// disabled
+// DisableTimestampKey is the viper variable used to define if the log timestamp
+// should be disabled
+// ShortTimestampKey is the viper variable used to define the log timestamp
+// short format
+// TimestampFormatKey is the viper variable used to define the log timestamp
+// format
 const (
 	OutputKey           = "log_output"
 	FilenameKey         = "log_filename"
@@ -28,7 +32,8 @@ const (
 	TimestampFormatKey  = "log_formattimestamp"
 )
 
-// PrefixField ...
+// PrefixField is the viper variable to set and get the prefix to use in the text
+// formatter
 const (
 	PrefixField = "prefix"
 )
@@ -41,19 +46,14 @@ const (
 // 	"fatal"  - FATAL
 // 	"panic"  - PANIC
 
-// Logger encapsulate logrus.Logger and add the prefix
+// Logger encapsulate logrus.Logger and add the prefix. It also implements the
+// interface cli.Ui from github.com/mitchellh/cli to print logs using the text
+// formatter
 type Logger struct {
 	logrus.Logger
 
 	mu     sync.Mutex
 	prefix string
-}
-
-var l *Logger
-
-func init() {
-	v := viper.New()
-	l = New(v)
 }
 
 // New create a new Logger configured from an existing viper
@@ -94,7 +94,6 @@ func New(v *viper.Viper) *Logger {
 
 // NewEntryWithPrefix creates a new logrus.Entry with a prefix.
 func (logger *Logger) NewEntryWithPrefix(prefix string) *logrus.Entry {
-	logger.SetPrefix(prefix)
 	return logger.WithField(PrefixField, prefix)
 }
 
@@ -116,48 +115,4 @@ func (logger *Logger) SetPrefix(prefix string) {
 	logger.mu.Lock()
 	defer logger.mu.Unlock()
 	logger.prefix = prefix
-}
-
-// StdLogger return the standar logger
-func StdLogger() *Logger {
-	return l
-}
-
-// NewEntry create a new logger entry configured from global viper variables
-func NewEntry() *logrus.Entry {
-	logrus.SetFormatter(&TextFormatter{
-		ForceColors:      viper.GetBool(ForceColorsKey),
-		DisableColors:    viper.GetBool(DisableColorsKey),
-		DisableTimestamp: viper.GetBool(DisableTimestampKey),
-		ShortTimestamp:   viper.GetBool(ShortTimestampKey),
-		TimestampFormat:  viper.GetString(TimestampFormatKey),
-	})
-	// DisableTimestamp: true, DisableColors: true
-
-	if viper.IsSet(OutputKey) {
-		writer := viper.Get(OutputKey).(io.Writer)
-		logrus.SetOutput(writer)
-	} else if viper.IsSet(FilenameKey) {
-		logfilename := viper.GetString(FilenameKey)
-		out, err := os.OpenFile(logfilename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
-		if err == nil {
-			logrus.SetOutput(out)
-		} else {
-			logrus.Errorf("Cannot create log file %s. %s", logfilename, err)
-		}
-	}
-
-	if viper.IsSet(LevelKey) {
-		logLevel, err := logrus.ParseLevel(viper.GetString(LevelKey))
-		if err == nil {
-			logrus.SetLevel(logLevel)
-		}
-	}
-
-	return logrus.NewEntry(logrus.StandardLogger())
-}
-
-// Prefix creates a new logrus.Entry from a global logrus Entry
-func Prefix(prefix string) *logrus.Entry {
-	return NewEntry().WithField(PrefixField, prefix)
 }
