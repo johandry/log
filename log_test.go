@@ -22,36 +22,41 @@ func removeTimestamp(logMessage string) string {
 	return noResetColor
 }
 
+func newLogger(b *bytes.Buffer, v *viper.Viper) *log.Logger {
+	v.Set(log.OutputKey, b)
+	l := log.New(v)
+	return l
+}
+
 func TestConfigWithViperNoColor(t *testing.T) {
-	var b bytes.Buffer
 	var expectedLogMessage string
 	var actualLogMessage string
 
+	var b bytes.Buffer
 	v := viper.New()
-	v.Set(log.OutputKey, &b)
+
 	v.Set(log.ForceColorsKey, false)
 	v.Set(log.LevelKey, "debug")
+	l := newLogger(&b, v)
 
-	l := log.New(v)
-
-	l.Prefix("main").WithFields(logrus.Fields{"key": "value", "env": "test testing"}).Info("Information")
-	expectedLogMessage = " INFO  Main: Information env=\"test testing\" key=value"
+	l.Prefix("test").WithFields(logrus.Fields{"key": "value", "env": "test testing"}).Info("Information")
+	expectedLogMessage = " INFO  Test: Information env=\"test testing\" key=value"
 	actualLogMessage = removeTimestamp(b.String())
 	if actualLogMessage != expectedLogMessage {
 		t.Errorf("Expected '%s', but got '%s'", expectedLogMessage, actualLogMessage)
 	}
 	b.Reset()
 
-	l.Prefix("main").Warn("Warning")
-	expectedLogMessage = " WARN  Main: Warning"
+	l.Prefix("test").Warn("Warning")
+	expectedLogMessage = " WARN  Test: Warning"
 	actualLogMessage = removeTimestamp(b.String())
 	if actualLogMessage != expectedLogMessage {
 		t.Errorf("Expected '%s', but got '%s'", expectedLogMessage, actualLogMessage)
 	}
 	b.Reset()
 
-	l.Prefix("main").Error("Error")
-	expectedLogMessage = " ERROR Main: Error"
+	l.Prefix("test").Error("Error")
+	expectedLogMessage = " ERROR Test: Error"
 	actualLogMessage = removeTimestamp(b.String())
 	if actualLogMessage != expectedLogMessage {
 		t.Errorf("Expected '%s', but got '%s'", expectedLogMessage, actualLogMessage)
@@ -71,24 +76,24 @@ func TestConfigWithViperColor(t *testing.T) {
 
 	l := log.New(v)
 
-	// l.Prefix("main").WithFields(logrus.Fields{"key": "value", "env": "test testing"}).Info("Information")
-	// expectedLogMessage = fmt.Sprintf(" %sINFO%s  Main: Information %senv%s=\"test testing\" %skey%s=value", ansi.Green, ansi.Reset, ansi.Green, ansi.Reset, ansi.Green, ansi.Reset)
+	// l.Prefix("test").WithFields(logrus.Fields{"key": "value", "env": "test testing"}).Info("Information")
+	// expectedLogMessage = fmt.Sprintf(" %sINFO%s  Test: Information %senv%s=\"test testing\" %skey%s=value", ansi.Green, ansi.Reset, ansi.Green, ansi.Reset, ansi.Green, ansi.Reset)
 	// actualLogMessage = removeTimestamp(b.String())
 	// if actualLogMessage != expectedLogMessage {
 	// 	t.Errorf("Expected '%s', but got '%s'", expectedLogMessage, actualLogMessage)
 	// }
 	// b.Reset()
 	//
-	// l.Prefix("main").Warn("Warning")
-	// expectedLogMessage = fmt.Sprintf(" %sWARN%s  Main: Warning", ansi.Yellow, ansi.Reset)
+	// l.Prefix("test").Warn("Warning")
+	// expectedLogMessage = fmt.Sprintf(" %sWARN%s  Test: Warning", ansi.Yellow, ansi.Reset)
 	// actualLogMessage = removeTimestamp(b.String())
 	// if actualLogMessage != expectedLogMessage {
 	// 	t.Errorf("Expected '%s', but got '%s'", expectedLogMessage, actualLogMessage)
 	// }
 	// b.Reset()
 
-	l.Prefix("main").Error("Error")
-	expectedLogMessage = fmt.Sprintf(" %sERROR%s Main: Error", ansi.Red, ansi.Reset)
+	l.Prefix("test").Error("Error")
+	expectedLogMessage = fmt.Sprintf(" %sERROR%s Test: Error", ansi.Red, ansi.Reset)
 	actualLogMessage = removeTimestamp(b.String())
 	if actualLogMessage != expectedLogMessage {
 		t.Errorf("Expected '%s', but got '%s'", expectedLogMessage, actualLogMessage)

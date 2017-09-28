@@ -18,12 +18,12 @@ func (logger *Logger) AskSecret(query string) (string, error) {
 
 // Error is used for any error messages that might appear on standard error.
 func (logger *Logger) Error(message string) {
-	logger.Error(message)
+	logger.error(message)
 }
 
 // Info is called for information output.
 func (logger *Logger) Info(message string) {
-	logger.Info(message)
+	logger.info(message)
 }
 
 // Output is called for normal standard output.
@@ -33,5 +33,5 @@ func (logger *Logger) Output(message string) {
 
 // Warn is used for any warning messages that might appear on standard error.
 func (logger *Logger) Warn(message string) {
-	logger.Warn(message)
+	logger.warn(message)
 }

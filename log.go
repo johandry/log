@@ -116,3 +116,126 @@ func (logger *Logger) SetPrefix(prefix string) {
 	defer logger.mu.Unlock()
 	logger.prefix = prefix
 }
+
+// Debugf redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Debugf(format string, args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Debugf(format, args...)
+}
+
+// Infof redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Infof(format string, args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Infof(format, args...)
+}
+
+// Printf redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Printf(format string, args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Printf(format, args...)
+}
+
+// Warnf redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Warnf(format string, args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Warnf(format, args...)
+}
+
+// Warningf redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Warningf(format string, args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Warnf(format, args...)
+}
+
+// Errorf redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Errorf(format string, args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Errorf(format, args...)
+}
+
+// Fatalf redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Fatalf(format string, args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Fatalf(format, args...)
+}
+
+// Panicf redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Panicf(format string, args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Panicf(format, args...)
+}
+
+// Debug redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Debug(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Debug(args...)
+}
+
+// Print redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Print(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Info(args...)
+}
+
+// Warning redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Warning(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Warn(args...)
+}
+
+// Fatal redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Fatal(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Fatal(args...)
+}
+
+// Panic redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Panic(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Panic(args...)
+}
+
+// Debugln redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Debugln(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Debugln(args...)
+}
+
+// Infoln redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Infoln(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Infoln(args...)
+}
+
+// Println redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Println(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Println(args...)
+}
+
+// Warnln redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Warnln(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Warnln(args...)
+}
+
+// Warningln redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Warningln(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Warnln(args...)
+}
+
+// Errorln redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Errorln(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Errorln(args...)
+}
+
+// Fatalln redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Fatalln(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Fatalln(args...)
+}
+
+// Panicln redeclares the logrus method with the same name to use the prefix set
+func (logger *Logger) Panicln(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Panicln(args...)
+}
+
+// Error cannot be exported as they are redefined as in mitchellh/cli.Ui to
+// implement that interface
+func (logger *Logger) error(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Error(args...)
+}
+
+// Info cannot be exported as they are redefined as in mitchellh/cli.Ui to
+// implement that interface
+func (logger *Logger) info(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Info(args...)
+}
+
+// Warn cannot be exported as they are redefined as in mitchellh/cli.Ui to
+// implement that interface
+func (logger *Logger) warn(args ...interface{}) {
+	logger.WithField(PrefixField, logger.prefix).Warn(args...)
+}
