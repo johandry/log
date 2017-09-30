@@ -38,6 +38,16 @@ const (
 	PrefixField = "prefix"
 )
 
+const (
+	defLevel            = logrus.InfoLevel
+	defForceColors      = true
+	defDisableColors    = false
+	defDisableTimestamp = false
+	defShortTimestamp   = false
+	defTimestampFormat  = ""
+	defPrefix           = ""
+)
+
 // Log levels:
 // 	"debug"  - DEBUG
 // 	"info"   - INFO
@@ -56,7 +66,7 @@ type Logger struct {
 	prefix string
 }
 
-// New create a new Logger configured from an existing viper
+// New creates a new Logger configured from an existing viper instance
 func New(v *viper.Viper) *Logger {
 	logger := &Logger{
 		prefix: v.GetString(PrefixField),
@@ -87,6 +97,72 @@ func New(v *viper.Viper) *Logger {
 		if err == nil {
 			logger.Level = logLevel
 		}
+	}
+
+	return logger
+}
+
+// NewDefault creates a new Logger configured with defaults values or global
+// viper values if they are defined.
+func NewDefault() *Logger {
+	prefix := defPrefix
+	if viper.IsSet(PrefixField) {
+		prefix = viper.GetString(PrefixField)
+	}
+	logger := &Logger{
+		prefix: prefix,
+	}
+
+	forceColors := defForceColors
+	if viper.IsSet(ForceColorsKey) {
+		forceColors = viper.GetBool(ForceColorsKey)
+	}
+	disableColors := defDisableColors
+	if viper.IsSet(DisableColorsKey) {
+		forceColors = viper.GetBool(DisableColorsKey)
+	}
+	disableTimestampKey := defDisableTimestamp
+	if viper.IsSet(DisableTimestampKey) {
+		forceColors = viper.GetBool(DisableTimestampKey)
+	}
+	shortTimestamp := defShortTimestamp
+	if viper.IsSet(ShortTimestampKey) {
+		forceColors = viper.GetBool(ShortTimestampKey)
+	}
+	timestampFormat := defTimestampFormat
+	if viper.IsSet(TimestampFormatKey) {
+		timestampFormat = viper.GetString(TimestampFormatKey)
+	}
+	logger.Formatter = &TextFormatter{
+		ForceColors:      forceColors,
+		DisableColors:    disableColors,
+		DisableTimestamp: disableTimestampKey,
+		ShortTimestamp:   shortTimestamp,
+		TimestampFormat:  timestampFormat,
+	}
+	// DisableTimestamp: true, DisableColors: true
+
+	if viper.IsSet(OutputKey) {
+		logger.Out = viper.Get(OutputKey).(io.Writer)
+	} else if viper.IsSet(FilenameKey) {
+		logfilename := viper.GetString(FilenameKey)
+		out, err := os.OpenFile(logfilename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+		if err == nil {
+			logger.Out = out
+		} else {
+			logger.Errorf("Cannot create log file %s. %s", logfilename, err)
+		}
+	} else {
+		logger.Out = os.Stderr
+	}
+
+	if viper.IsSet(LevelKey) {
+		logLevel, err := logrus.ParseLevel(viper.GetString(LevelKey))
+		if err == nil {
+			logger.Level = logLevel
+		}
+	} else {
+		logger.Level = defLevel
 	}
 
 	return logger
