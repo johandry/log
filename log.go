@@ -38,9 +38,10 @@ const (
 	PrefixField = "prefix"
 )
 
+// Defaults values to be used when creating a Logger without user parameters
 const (
 	defLevel            = logrus.InfoLevel
-	defForceColors      = true
+	defForceColors      = false
 	defDisableColors    = false
 	defDisableTimestamp = false
 	defShortTimestamp   = false
