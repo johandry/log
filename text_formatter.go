@@ -170,7 +170,7 @@ func (f *TextFormatter) levelText(entry *logrus.Entry) (levelText string) {
 func (f *TextFormatter) prefixText(entry *logrus.Entry) (prefixText string) {
 	prefixText = ""
 	if _, ok := entry.Data[PrefixField]; ok {
-		prefixText = fmt.Sprintf(" %s:", strings.Title(entry.Data[PrefixField].(string)))
+		prefixText = fmt.Sprintf(" %s:", entry.Data[PrefixField].(string))
 	}
 	return
 }
