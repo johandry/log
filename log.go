@@ -169,6 +169,29 @@ func NewDefault() *Logger {
 	return logger
 }
 
+// Copy makes a deep copy of this logger
+func (logger *Logger) Copy() *Logger {
+	var formatter *TextFormatter
+	formatter = logger.Formatter.(*TextFormatter)
+
+	textFormatter := &TextFormatter{
+		ForceColors:      formatter.ForceColors,
+		DisableColors:    formatter.DisableColors,
+		DisableTimestamp: formatter.DisableTimestamp,
+		ShortTimestamp:   formatter.ShortTimestamp,
+		TimestampFormat:  formatter.TimestampFormat,
+	}
+
+	l := Logger{
+		prefix: logger.prefix,
+	}
+	l.Formatter = textFormatter
+	l.Out = logger.Out
+	l.Level = logger.Level
+
+	return &l
+}
+
 // NewEntryWithPrefix creates a new logrus.Entry with a prefix.
 func (logger *Logger) NewEntryWithPrefix(prefix string) *logrus.Entry {
 	return logger.WithField(PrefixField, prefix)
